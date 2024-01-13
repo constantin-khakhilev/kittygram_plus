@@ -1,9 +1,10 @@
 import datetime as dt
 
 import webcolors
+from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from .models import Achievement, AchievementCat, Cat, Owner
+from .models import CHOICES, Achievement, AchievementCat, Cat, Owner
 
 
 class Hex2NameColor(serializers.Field):
@@ -25,10 +26,19 @@ class Hex2NameColor(serializers.Field):
 
 
 class AchievementSerializer(serializers.ModelSerializer):
+    achievement_name = serializers.CharField(source='name')
 
     class Meta:
         model = Achievement
         fields = ('id', 'name')
+
+
+class CatListSerializer(serializers.ModelSerializer):
+    color = serializers.ChoiceField(choices=CHOICES)
+
+    class Meta:
+        model = Cat
+        fields = ('id', 'name', 'color')
 
 
 class CatSerializer(serializers.ModelSerializer):
@@ -36,7 +46,9 @@ class CatSerializer(serializers.ModelSerializer):
     # Убрали read_only=True
     # Убрали owner = serializers.StringRelatedField(read_only=True)
     age = serializers.SerializerMethodField()
-    color = Hex2NameColor()  # Вот он - наш собственный тип поля
+    # color = Hex2NameColor()  # Вот он - наш собственный тип поля
+    # Теперь поле примет только значение, упомянутое в списке CHOICES
+    color = serializers.ChoiceField(choices=CHOICES)
 
     class Meta:
         model = Cat
